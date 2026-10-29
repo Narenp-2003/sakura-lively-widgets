@@ -1,0 +1,11 @@
+{
+  "AppVersion": "2.0.0.0",
+  "Title": "Sakura II",
+  "Thumbnail": "wallpaper.png",
+  "Preview": "wallpaper.png",
+  "Desc": "Material 3 widgets",
+  "Author": "Narendra",
+  "Type": 1,
+  "FileName": "index.html",
+  "Arguments": "--system-nowplaying --system-information"
+}

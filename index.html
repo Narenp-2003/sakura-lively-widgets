@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+:root{
+  --primary:#9cd1c7; --on-primary:#104841;
+  --primary-container:#275b53; --on-primary-container:#b8eee4;
+  --surface:#0a0f0e; --on-surface:#dce8e4; --on-variant:#a2adaa; --outline:#6d7875;
+  --card:rgba(19,27,26,.74);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--surface);
+  font-family:"Segoe UI Variable","Segoe UI",sans-serif;color:var(--on-surface)}
+body{background:url(wallpaper.png) center/cover no-repeat}
+.card{background:var(--card);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border-radius:26px;padding:18px 20px}
+.col{position:absolute;display:flex;flex-direction:column;gap:12px}
+#left{left:28px;top:64px;width:300px}
+#right{right:28px;bottom:96px;width:310px;align-items:stretch}
+.small{font-size:12px;color:var(--on-variant)}
+
+.hello h2{font-size:18px;font-weight:600}
+.hello p{margin-top:4px}
+.loc{font-size:13px;color:var(--on-variant);margin-bottom:6px}
+.big{font-size:44px;font-weight:700;letter-spacing:-1px;line-height:1}
+.world{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.world div{background:rgba(255,255,255,.05);border-radius:14px;padding:10px 12px}
+.world b{display:block;font-size:15px;margin-top:2px}
+
+#vclock{align-self:flex-end;text-align:center;font-size:84px;font-weight:800;
+  line-height:.92;letter-spacing:-2px;margin-bottom:6px;
+  text-shadow:0 4px 24px rgba(0,0,0,.45)}
+#datebox{align-self:flex-end;width:88px;border-radius:18px;overflow:hidden;
+  background:var(--card);backdrop-filter:blur(18px);text-align:center;margin-bottom:8px}
+#datebox .top{background:var(--primary-container);color:var(--on-primary-container);
+  font-size:12px;font-weight:700;padding:5px 0;letter-spacing:1px}
+#datebox .num{font-size:38px;font-weight:700;padding:6px 0}
+
+.music{display:flex;align-items:center;gap:14px}
+.art{width:64px;height:64px;border-radius:16px;background:var(--primary-container)
+  center/cover;display:flex;align-items:center;justify-content:center;font-size:26px;
+  color:var(--on-primary-container);flex:none}
+.music .t{font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:190px}
+
+.weather{display:flex;justify-content:space-between;align-items:center}
+.temp{font-size:34px;font-weight:700}
+.wicon{width:54px;height:54px;border-radius:50%;background:var(--primary);
+  color:var(--on-primary);display:flex;align-items:center;justify-content:center;font-size:26px}
+
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.stat{text-align:left;padding:16px}
+.stat .v{font-size:26px;font-weight:700;margin-top:10px}
+.stat .dot{width:34px;height:34px;border-radius:50%;background:var(--primary-container);
+  color:var(--on-primary-container);display:flex;align-items:center;justify-content:center;font-size:16px;margin-left:auto}
+</style>
+</head>
+<body>
+
+<div id="left" class="col">
+  <div class="card hello">
+    <h2 id="greet">Hello</h2>
+    <p class="small" id="wtext">Loading weather…</p>
+  </div>
+  <div class="card">
+    <div class="loc">📍 Bengaluru</div>
+    <div class="big" id="mainclock">--:--</div>
+    <div class="small" id="maindate" style="margin-top:6px"></div>
+    <div class="world">
+      <div><span class="small">Tokyo</span><b id="z0"></b></div>
+      <div><span class="small">Seoul</span><b id="z1"></b></div>
+      <div><span class="small">London</span><b id="z2"></b></div>
+      <div><span class="small">New York</span><b id="z3"></b></div>
+    </div>
+  </div>
+</div>
+
+<div id="right" class="col">
+  <div id="vclock"><div id="vh">11</div><div id="vm">33</div></div>
+  <div id="datebox"><div class="top" id="dtop">JUL WED</div><div class="num" id="dnum">22</div></div>
+
+  <div class="card music">
+    <div class="art" id="art">♪</div>
+    <div><div class="t" id="mtitle">Nothing playing</div><div class="small" id="martist">—</div></div>
+  </div>
+
+  <div class="card weather">
+    <div>
+      <div class="temp" id="temp">--°C</div>
+      <div class="small" id="wdesc">—</div>
+      <div class="small" id="wextra" style="margin-top:6px"></div>
+    </div>
+    <div class="wicon" id="wicon">☁</div>
+  </div>
+
+  <div class="stats">
+    <div class="card stat"><div class="dot">⚙</div><div class="v" id="cpu">0%</div><div class="small">CPU</div></div>
+    <div class="card stat"><div class="dot">▦</div><div class="v" id="ram">0%</div><div class="small">RAM</div></div>
+    <div class="card stat"><div class="dot">⚡</div><div class="v" id="bat">--%</div><div class="small">Battery</div></div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const pad = n => String(n).padStart(2,'0');
+const zones = ['Asia/Tokyo','Asia/Seoul','Europe/London','America/New_York'];
+
+function tick(){
+  const d = new Date();
+  const h12 = d.getHours()%12 || 12, ap = d.getHours()>=12 ? 'PM':'AM';
+  $('mainclock').textContent = `${pad(h12)}:${pad(d.getMinutes())} ${ap}`;
+  $('maindate').textContent = d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+  $('vh').textContent = pad(h12); $('vm').textContent = pad(d.getMinutes());
+  $('dtop').textContent = d.toLocaleDateString('en-US',{month:'short'}).toUpperCase()+' '+
+                          d.toLocaleDateString('en-US',{weekday:'short'}).toUpperCase();
+  $('dnum').textContent = d.getDate();
+  zones.forEach((z,i)=> $('z'+i).textContent =
+    d.toLocaleTimeString('en-US',{timeZone:z,hour:'2-digit',minute:'2-digit',hour12:true}));
+  const h = d.getHours();
+  $('greet').textContent = h<12 ? 'Good morning' : h<18 ? 'Good afternoon' : 'Good evening';
+}
+tick(); setInterval(tick, 1000);
+
+/* Weather (Open-Meteo, no API key) */
+const WMO = {0:['Clear','☀'],1:['Mostly clear','🌤'],2:['Partly cloudy','⛅'],3:['Overcast','☁'],
+  45:['Fog','🌫'],48:['Fog','🌫'],51:['Drizzle','🌦'],53:['Drizzle','🌦'],55:['Drizzle','🌦'],
+  61:['Rain','🌧'],63:['Rain','🌧'],65:['Heavy rain','🌧'],80:['Showers','🌦'],81:['Showers','🌦'],
+  82:['Heavy showers','🌧'],95:['Thunderstorm','⛈'],96:['Thunderstorm','⛈'],99:['Thunderstorm','⛈']};
+async function weather(){
+  try{
+    const r = await fetch('https://api.open-meteo.com/v1/forecast?latitude=12.97&longitude=77.59'+
+      '&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,cloud_cover,is_day&timezone=auto');
+    const c = (await r.json()).current;
+    let w = WMO[c.weather_code] || ['—','☁'];
+    if (c.weather_code <= 3) {
+      const cc = c.cloud_cover, day = c.is_day;
+      w = cc < 15 ? ['Clear', day ? '☀' : '🌙']
+        : cc < 40 ? ['Mostly clear', day ? '🌤' : '🌙']
+        : cc < 75 ? ['Partly cloudy', '⛅']
+        : ['Overcast', '☁'];
+    }
+    $('temp').textContent = Math.round(c.temperature_2m)+'°C';
+    $('wdesc').textContent = w[0]+' · Bengaluru';
+    $('wicon').textContent = w[1];
+    $('wextra').textContent = `💧 ${c.relative_humidity_2m}%   🌬 ${c.wind_speed_10m} km/h`;
+    $('wtext').textContent = w[0].toLowerCase()+' today';
+  }catch(e){ $('wtext').textContent = 'Weather unavailable'; }
+}
+weather(); setInterval(weather, 15*60*1000);
+
+/* Battery */
+if (navigator.getBattery){
+  navigator.getBattery().then(b=>{
+    const u=()=>$('bat').textContent = Math.round(b.level*100)+'%';
+    u(); b.addEventListener('levelchange',u);
+  }).catch(()=>{});
+}
+
+/* Lively callbacks */
+function livelySystemInformation(data){
+  try{
+    const s = typeof data==='string' ? JSON.parse(data) : data;
+    if (s.CurrentCpu!==undefined) $('cpu').textContent = Math.round(s.CurrentCpu)+'%';
+    if (s.TotalRam){
+      const used = s.CurrentRamAvail!==undefined ? s.TotalRam - s.CurrentRamAvail
+                 : s.CurrentRamUsed;
+      if (used!==undefined) $('ram').textContent = Math.round(used/s.TotalRam*100)+'%';
+    }
+  }catch(e){}
+}
+function livelyCurrentTrack(data){
+  try{
+    const t = typeof data==='string' ? JSON.parse(data) : data;
+    if(!t){ $('mtitle').textContent='Nothing playing'; $('martist').textContent='—';
+            $('art').style.backgroundImage=''; $('art').textContent='♪'; return; }
+    $('mtitle').textContent = t.Title || 'Unknown';
+    $('martist').textContent = t.Artist || '';
+    if (t.Thumbnail){
+      const src = t.Thumbnail.startsWith('data:') ? t.Thumbnail : 'data:image/png;base64,'+t.Thumbnail;
+      $('art').style.backgroundImage = `url(${src})`; $('art').textContent='';
+    }
+  }catch(e){}
+}
+</script>
+</body>
+</html>
