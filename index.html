@@ -117,7 +117,7 @@ function tick(){
   zones.forEach((z,i)=> $('z'+i).textContent =
     d.toLocaleTimeString('en-US',{timeZone:z,hour:'2-digit',minute:'2-digit',hour12:true}));
   const h = d.getHours();
-  $('greet').textContent = h<12 ? 'Good morning' : h<18 ? 'Good afternoon' : 'Good evening';
+  $('greet').textContent = h<4 ? 'Good night' : h<12 ? 'Good morning' : h<16 ? 'Good afternoon' : h<20 ? 'Good evening' : 'Good night';
 }
 tick(); setInterval(tick, 1000);
 
